@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Weekly Workout Schedule</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* Animation for tabs */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    /* Custom checkbox */
+    .custom-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #3b82f6;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .custom-checkbox:checked {
+      background-color: #3b82f6;
+    }
+
+    .custom-checkbox:checked::after {
+      content: '\2713';
+      color: white;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <header class="text-center mb-10">
+    <h1 class="text-4xl font-bold text-blue-600 mb-2">My Weekly Workout Plan</h1>
+    <p class="text-gray-600">Stay consistent and track your progress</p>
+    <div class="mt-4 flex justify-center">
+      <div class="relative w-64">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <i class="fas fa-calendar-week text-blue-500"></i>
+        </div>
+        <input type="week" id="week-selector"
+               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
+               value="">
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile tabs (horizontal scroll) -->
+  <div class="lg:hidden mb-6">
+    <div class="flex overflow-x-auto pb-2 scrollbar-hide">
+      <div id="mobile-tabs" class="flex space-x-2">
+        <!-- Tabs will be injected here by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop tabs -->
+  <div class="hidden lg:flex mb-8">
+    <div id="desktop-tabs" class="flex w-full space-x-1">
+      <!-- Tabs will be injected here by JS -->
+    </div>
+  </div>
+
+  <!-- Workout content -->
+  <div id="workout-content" class="bg-white rounded-xl shadow-lg p-6">
+    <!-- Content will be injected here by JS -->
+    <div class="text-center py-10">
+      <i class="fas fa-dumbbell text-5xl text-blue-200 mb-4"></i>
+      <p class="text-gray-500">Select a day to view your workout</p>
+    </div>
+  </div>
+
+  <!-- Progress tracker -->
+  <div class="mt-6">
+    <div class="w-full bg-gray-200 rounded-full h-4">
+      <div id="progress-bar" class="bg-blue-600 h-4 rounded-full" style="width: 0%"></div>
+    </div>
+    <div class="flex justify-between mt-2 text-sm text-gray-600">
+      <span id="progress-percentage">0% completed</span>
+      <span id="progress-text">0/7 days</span>
+    </div>
+  </div>
+
+  <!-- Added: Weekly progress summary section -->
+  <div id="weekly-progress" class="mt-6 bg-white rounded-xl shadow-lg p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Weekly Progress Summary</h2>
+    <div id="weekly-progress-content" class="grid gap-4">
+      <!-- Weekly progress details will be injected here by JS -->
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Workout data
+
+  let workoutData = {};
+
+  // const weekName = document.getElementById('week-selector').value;
+  //
+  // fetch(`/api/v1/workoutday/data?weekName=${encodeURIComponent(weekName)}`)
+  // .then(response => {
+  //   if (!response.ok) throw new Error("Failed to fetch workout data");
+  //   return response.json();
+  // })
+  // .then(data => {
+  //   workoutData = data;
+  //   updateWorkoutContent(currentDay); // render nội dung hôm nay
+  //   updateProgress(); // cập nhật tiến trình
+  // })
+  // .catch(error => {
+  //   console.error('Failed to load workout data:', error);
+  // });
+
+  // Days of the week in order
+  const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  let currentDay = null;
+  let completedDays = 0;
+
+  // Initialize the app
+  document.addEventListener('DOMContentLoaded', function () {
+    // Set current week in the date picker
+    const today = new Date();
+    const year = today.getFullYear();
+    const weekNum = getWeekNumber(today);
+    document.getElementById('week-selector').value = `${year}-W${weekNum.toString().padStart(2, '0')}`;
+
+    // Create tabs
+    createTabs();
+
+    // 👉 Set today as default active tab
+    const todayIndex = (new Date().getDay() + 6) % 7;
+    const todayDay = daysOfWeek[todayIndex];
+    setActiveDay(todayDay);
+    loadWorkoutData();
+    updateWorkoutButtonState(currentDay);
+    // Update progress
+    updateProgress();
+    document.getElementById('week-selector').addEventListener('change', () => {
+      loadWorkoutData();
+    });
+  });
+
+  // Helper function to get week number
+  function getWeekNumber(d) {
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return weekNo;
+  }
+
+  // Create tabs for desktop and mobile
+  function createTabs() {
+    const desktopTabs = document.getElementById('desktop-tabs');
+    const mobileTabs = document.getElementById('mobile-tabs');
+
+    daysOfWeek.forEach(day => {
+      // Desktop tab
+      const desktopTab = document.createElement('button');
+      desktopTab.className = `flex-1 py-3 px-4 rounded-lg font-medium transition-all ${currentDay === day ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-blue-50'}`;
+      desktopTab.innerHTML = `
+                    <div class="flex flex-col items-center">
+                        <span class="text-sm uppercase">${day.substring(0, 3)}</span>
+                        <span class="text-lg">${day.charAt(0).toUpperCase() + day.slice(1)}</span>
+                    </div>
+                `;
+      desktopTab.addEventListener('click', () => setActiveDay(day));
+      desktopTabs.appendChild(desktopTab);
+
+      // Mobile tab
+      const mobileTab = document.createElement('button');
+      mobileTab.className = `flex-shrink-0 py-2 px-4 rounded-full font-medium whitespace-nowrap ${currentDay === day ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-blue-50'}`;
+      mobileTab.textContent = day.charAt(0).toUpperCase() + day.slice(1);
+      mobileTab.addEventListener('click', () => setActiveDay(day));
+      mobileTabs.appendChild(mobileTab);
+    });
+  }
+
+  // Set active day and update content
+  function setActiveDay(day) {
+    currentDay = day;
+
+    // Update tab styles
+    document.querySelectorAll('#desktop-tabs button, #mobile-tabs button').forEach(tab => {
+      const tabDay = tab.textContent.toLowerCase();
+      if (tabDay.includes(day)) {
+        tab.classList.add('bg-blue-600', 'text-white');
+        tab.classList.remove('bg-white', 'text-gray-700', 'hover:bg-blue-50');
+      } else {
+        tab.classList.remove('bg-blue-600', 'text-white');
+        tab.classList.add('bg-white', 'text-gray-700', 'hover:bg-blue-50');
+      }
+    });
+
+    // Update content
+    updateWorkoutContent(day);
+  }
+
+  // Update workout content for the selected day
+  function updateWorkoutContent(day) {
+    const workout = workoutData[day];
+    const contentDiv = document.getElementById('workout-content');
+
+    if (!workout) {
+      contentDiv.innerHTML = `
+                    <div class="text-center py-10">
+                        <i class="fas fa-calendar-times text-5xl text-blue-200 mb-4"></i>
+                        <p class="text-gray-500">No workout scheduled for this day</p>
+                    </div>
+                `;
+      updateWorkoutButtonState(day);
+      return;
+    }
+
+    let exercisesHTML = '';
+    workout.exercises.forEach((exercise, index) => {
+      exercisesHTML += `
+                    <div class="exercise-item mb-6 p-6 border border-gray-200 rounded-xl hover:shadow-lg transition-all ${exercise.completed ? 'bg-blue-50 border-blue-300' : 'bg-white'}">
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="md:w-2/5">
+                                <img src="${exercise.image}" alt="${exercise.name}" class="w-full h-56 object-cover rounded-xl shadow-md">
+                            </div>
+                            <div class="flex-1 flex flex-col">
+                                <div class="flex items-start gap-4">
+                                    <input type="checkbox" id="ex-${day}-${index}" class="custom-checkbox mt-2" ${exercise.completed ? 'checked' : ''}>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-3">
+                                            <div class="bg-blue-100 p-2 rounded-full">
+                                                <i class="fas ${exercise.icon} text-blue-600 text-lg"></i>
+                                            </div>
+                                            <h3 class="text-xl font-bold text-gray-800">${exercise.name}</h3>
+                                        </div>
+                                        <p class="text-gray-600 pl-11">${exercise.description}</p>
+                                        <div class="mt-4 pl-11">
+                                            <span class="inline-block bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full">
+                                                <i class="fas fa-dumbbell mr-1"></i> Strength
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+    });
+
+    contentDiv.innerHTML = `
+                <div class="fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">${workout.title}</h2>
+                        <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">${day.charAt(0).toUpperCase() + day.slice(1)}</span>
+                    </div>
+                    ${exercisesHTML}
+                    <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+                        <button id="complete-workout-${day}" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-all">
+                            <i class="fas fa-check mr-2"></i> Complete Workout
+                        </button>
+                    </div>
+                </div>
+            `;
+
+    // Add event listeners to checkboxes
+    workout.exercises.forEach((exercise, index) => {
+      const checkbox = document.getElementById(`ex-${day}-${index}`);
+      checkbox.addEventListener('change', function () {
+        exercise.completed = this.checked;
+
+        fetch('/api/v1/workoutday/update-status', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            weekName: document.getElementById('week-selector').value,
+            day: currentDay,
+            exerciseIndex: index,
+            completed: this.checked
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error("Failed to update");
+          console.log("Updated successfully");
+        }).catch(err => {
+          console.error("Update error:", err);
+          alert("Failed to update exercise status.");
+        });
+
+        // UI feedback update
+        const exerciseItem = this.closest('.exercise-item');
+        if (exercise.completed) {
+          exerciseItem.classList.add('bg-blue-50', 'border-blue-300');
+        } else {
+          exerciseItem.classList.remove('bg-blue-50', 'border-blue-300');
+        }
+
+        updateProgress();
+        setTimeout(() => {
+          updateWorkoutButtonState(day);
+        }, 50);
+      });
+    });
+    updateWorkoutButtonState(day);
+
+    // Modified: Allow workout completion with at least 6 exercises completed
+    const completeButton = document.getElementById(`complete-workout-${day}`);
+    completeButton.addEventListener('click', function () {
+      const completedExercises = workout.exercises.filter(ex => ex.completed).length;
+      const requiredExercises = day === 'sunday' ? 1 : 6;
+      if (completedExercises >= requiredExercises) {
+        this.innerHTML = '<i class="fas fa-check mr-2"></i> Workout Completed!';
+        this.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        this.classList.add('bg-green-500', 'hover:bg-green-600');
+        updateProgress();
+      } else {
+        alert(`Please complete at least ${requiredExercises} exercise${requiredExercises > 1 ? 's' : ''} (currently ${completedExercises}/${requiredExercises})!`);
+      }
+    });
+  }
+
+  async function loadWorkoutData() {
+    const weekName = document.getElementById('week-selector').value;
+
+    try {
+      const response = await fetch(`/api/v1/workoutday/data?weekName=${encodeURIComponent(weekName)}`);
+      if (!response.ok) throw new Error("Failed to fetch workout data");
+
+      workoutData = await response.json();
+      updateWorkoutContent(currentDay);
+      updateProgress();
+    } catch (err) {
+      console.error("Failed to load workout data:", err);
+    }
+  }
+
+  function updateWorkoutButtonState(day) {
+    const workout = workoutData[day];
+    if (!workout) return;
+
+    const completedExercises = workout.exercises.filter(ex => ex.completed).length;
+    const requiredExercises = day === 'sunday' ? 1 : 6;
+
+    const button = document.getElementById(`complete-workout-${day}`);
+    if (!button) return;
+
+    if (completedExercises >= requiredExercises) {
+      // Đủ điều kiện => chuyển trạng thái nút
+      button.innerHTML = '<i class="fas fa-check mr-2"></i> Workout Completed!';
+      button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+      button.classList.add('bg-green-500', 'hover:bg-green-600');
+      button.disabled = true; // hoặc: button.style.display = 'none';
+    } else {
+      // Chưa đủ => giữ nút ở trạng thái mặc định
+      button.innerHTML = '<i class="fas fa-check mr-2"></i> Complete Workout';
+      button.classList.remove('bg-green-500', 'hover:bg-green-600');
+      button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+      button.disabled = false;
+    }
+  }
+
+  // Update progress bar and text
+  function updateProgress() {
+    completedDays = 0;
+    let daysWithExercises = 0;
+    let weeklyProgressHTML = '';
+
+    daysOfWeek.forEach(day => {
+      const workout = workoutData[day];
+      let completedExercises = 0;
+      let totalExercises = 0;
+      if (workout && workout.exercises.length > 0) {
+        daysWithExercises++;
+        completedExercises = workout.exercises.filter(ex => ex.completed).length;
+        totalExercises = workout.exercises.length;
+        // Debug: Log exercise counts for each day
+        console.log(`Day: ${day}, Completed: ${completedExercises}/${totalExercises}`);
+        // Modified: Count Sunday as completed if 1 exercise is done, other days if 6 or more
+        if (day === 'sunday' && completedExercises >= 1) {
+          completedDays++;
+        } else if (completedExercises >= 6) {
+          completedDays++;
+        }
+      }
+      const dayName = day.charAt(0).toUpperCase() + day.slice(1);
+      let status = 'No exercises scheduled';
+      let statusFlag = 'none'; // 'none' | 'completed' | 'not-completed'
+
+      if (totalExercises > 0) {
+        const required = day === 'sunday' ? 1 : 6;
+        if ((day === 'sunday' && completedExercises >= 1) || (day !== 'sunday' && completedExercises >= 6)) {
+          status = `${completedExercises}/${totalExercises} exercises completed`;
+          statusFlag = 'completed';
+        } else {
+          status = `${completedExercises}/${totalExercises} Not completed`;
+          statusFlag = 'not-completed';
+        }
+      }
+
+      const statusColor = statusFlag === 'not-completed'
+          ? 'text-red-500'
+          : statusFlag === 'none'
+              ? 'text-gray-500'
+              : 'text-green-600';
+
+      weeklyProgressHTML += `
+  <div class="flex justify-between items-center p-2 border-b border-gray-200">
+      <span class="font-medium">${dayName}</span>
+      <span class="${statusColor}">${status}</span>
+  </div>
+`;
+    });
+
+    // Debug: Log total completed days and days with exercises
+    console.log(`Completed Days: ${completedDays}, Days with Exercises: ${daysWithExercises}`);
+    const progressPercentage = daysWithExercises > 0 ? Math.round((completedDays / daysWithExercises) * 100) : 0;
+    document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+    document.getElementById('progress-text').textContent = `${completedDays}/${daysWithExercises} days`;
+    document.getElementById('progress-percentage').textContent = `${progressPercentage}% completed`;
+
+    document.getElementById('weekly-progress-content').innerHTML = weeklyProgressHTML;
+  }
+</script>
+</body>
+
+</html>
