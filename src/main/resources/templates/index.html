@@ -183,6 +183,9 @@
     document.getElementById('week-selector').addEventListener('change', () => {
       loadWorkoutData();
     });
+    setInterval(() => {
+      fetch('/healthcheck').catch(() => {});
+    }, 4 * 60 * 1000); // 4 phút
   });
 
   // Helper function to get week number

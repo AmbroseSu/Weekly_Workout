@@ -14,5 +14,10 @@ public class PageController {
   public String homePage() {
     return "index"; // đảm bảo file templates/index.html tồn tại
   }
+
+  @GetMapping("/healthcheck")
+  public String healthCheck() {
+    return "OK";
+  }
 }
 
