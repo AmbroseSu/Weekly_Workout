@@ -17,70 +17,70 @@ public class WorkoutTemplateData {
             "icon", "fa-dumbbell",
             "description", "4 sets of 8–12 reps. Focus on explosive push and full lockout.",
             "completed", false,
-            "image", "https://bizweb.dktcdn.net/100/011/344/files/tong-quan-ve-bench-press.jpg?v=1679370793095"
+            "image", "https://www.shutterstock.com/shutterstock/videos/16516849/thumb/6.jpg?ip=x480"
         ),
         Map.of(
             "name", "Incline Dumbbell Press",
             "icon", "fa-dumbbell",
             "description", "4 sets of 8–12 reps. Control the descent, pause slightly at the bottom.",
             "completed", false,
-            "image", "https://cdn.muscleandstrength.com/sites/default/files/incline-dumbbell-press.jpg"
+            "image", "https://www.thethaothientruong.vn/uploads/Incline-Dumbbell-Press-la-gi-1.jpg"
         ),
         Map.of(
             "name", "Dumbbell Fly",
             "icon", "fa-dumbbell",
             "description", "3 sets of 12–15 reps. Wide stretch, soft lock at the top. Avoid jerking.",
             "completed", false,
-            "image", "https://www.inspireusafoundation.org/wp-content/uploads/2022/11/dumbbell-fly.jpg"
+            "image", "https://liftmanual.com/wp-content/uploads/2023/04/dumbbell-fly-on-exercise-ball.jpg"
         ),
         Map.of(
             "name", "Dips or Close Grip Bench Press",
             "icon", "fa-dumbbell",
             "description", "3 sets of 10–12 reps. Keep elbows tight to target triceps more.",
             "completed", false,
-            "image", "https://barbend.com/wp-content/uploads/2022/04/BarBend-Article-Image-750-x-421-px-69.jpg"
+            "image", "https://liftmanual.com/wp-content/uploads/2023/04/ez-bar-close-grip-bench-press.jpg"
         ),
         Map.of(
             "name", "Tricep Rope Pushdown",
             "icon", "fa-dumbbell",
             "description", "3 sets of 12–15 reps. Full extension at bottom, squeeze the triceps.",
             "completed", false,
-            "image", "https://www.inspireusafoundation.org/wp-content/uploads/2022/11/triceps-rope-pushdown.jpg"
+            "image", "https://www.hevyapp.com/wp-content/uploads/02001101-Cable-Pushdown-with-rope-attachment_Upper-Arms_small.jpg"
         ),
         Map.of(
             "name", "Pec Deck Machine",
             "icon", "fa-dumbbell",
             "description", "3 sets of 12–15 reps. Constant tension. Don’t let the handles bounce.",
             "completed", false,
-            "image", "https://i.ytimg.com/vi/5qcE1jw5WX0/maxresdefault.jpg"
+            "image", "https://cdn.shopify.com/s/files/1/1497/9682/files/MicrosoftTeams-image_5_c40117c8-4452-4801-b272-c56dcde1c0f0.jpg?v=1659021798"
         ),
         Map.of(
             "name", "Cable Chest Crossover",
             "icon", "fa-dumbbell",
             "description", "3 sets of 12–15 reps. Cross wrists slightly at end for maximum contraction.",
             "completed", false,
-            "image", "https://cdn.shopify.com/s/files/1/1497/9682/files/Cable_Crossover.png?v=1676373529"
+            "image", "https://www.endomondo.com/wp-content/uploads/2024/01/Standing-Cable-Decline-Press.jpg"
         ),
         Map.of(
             "name", "Dumbbell Pullover",
             "icon", "fa-dumbbell",
             "description", "3 sets of 12 reps. Controlled breathing, focus on chest and ribcage expansion.",
             "completed", false,
-            "image", "https://cdn.muscleandstrength.com/sites/default/files/dumbbell-pullover.jpg"
+            "image", "https://cdn.shopify.com/s/files/1/0449/8453/3153/files/Dumbbell-Pullover-Muscles-Worked_600x600.jpg?v=1718935258"
         ),
         Map.of(
             "name", "Overhead Triceps Extension",
             "icon", "fa-dumbbell",
             "description", "3 sets of 10–12 reps. Keep elbows in line. Don’t flare.",
             "completed", false,
-            "image", "https://cdn.shopify.com/s/files/1/0150/6232/files/Seated_Overhead_Dumbbell_Triceps_Extension_1024x1024.jpg"
+            "image", "https://liftmanual.com/wp-content/uploads/2023/04/cable-high-pulley-overhead-tricep-extension.jpg"
         ),
         Map.of(
             "name", "Skull Crusher",
             "icon", "fa-dumbbell",
             "description", "3 sets of 10–12 reps. Lower slowly, avoid locking out too hard at top.",
             "completed", false,
-            "image", "https://fitliferegime.com/wp-content/uploads/2022/10/Skull-Crusher-Triceps-Exercise.webp"
+            "image", "https://pump-app.s3.eu-west-2.amazonaws.com/exercise-assets/03511101-Dumbbell-Lying-Triceps-Extension_Upper-Arms_small.jpg"
         )
     ));
     template.put("tuesday", List.of(

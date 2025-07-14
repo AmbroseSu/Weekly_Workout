@@ -184,8 +184,8 @@
       loadWorkoutData();
     });
     setInterval(() => {
-      fetch('/healthcheck').catch(() => {});
-    }, 4 * 60 * 1000); // 4 phút
+      fetch('/api/v1/home/healthcheck').catch(() => {});
+    }, 1 * 60 * 1000); // 4 phút
   });
 
   // Helper function to get week number

@@ -16,10 +16,10 @@ public class WorkoutInitService {
   private final WorkoutRepository workoutRepository;
   private final WorkoutTemplateData workoutTemplateData;
 
-  //@PostConstruct
+  @PostConstruct
   public void initWorkoutsOnStartup() {
     // Tạo sẵn 8 tuần (2 tháng) tính từ hiện tại
-    initializeWeeks(70);
+    initializeWeeks(2);
   }
 
   public void initializeWeeks(int numberOfWeeks) {
