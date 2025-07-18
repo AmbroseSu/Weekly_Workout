@@ -19,7 +19,7 @@ public class WorkoutInitService {
   @PostConstruct
   public void initWorkoutsOnStartup() {
     // Tạo sẵn 8 tuần (2 tháng) tính từ hiện tại
-    initializeWeeks(2);
+    initializeWeeks(70);
   }
 
   public void initializeWeeks(int numberOfWeeks) {
