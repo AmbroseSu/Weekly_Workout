@@ -1,8 +1,13 @@
 spring:
+#  datasource:
+#    url: jdbc:postgresql://ep-crimson-pond-a8jc0e5i-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channelBinding=require
+#    username: neondb_owner
+#    password: npg_4qreRowit0Bl
+#    driver-class-name: org.postgresql.Driver
   datasource:
-    url: jdbc:postgresql://ep-crimson-pond-a8jc0e5i-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channelBinding=require
-    username: neondb_owner
-    password: npg_4qreRowit0Bl
+    url: jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require
+    username: postgres.edspnaurlljtiakmznen
+    password: Weekly_Workout2025
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
